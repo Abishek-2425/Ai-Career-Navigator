@@ -1,0 +1,175 @@
+# AI Career Navigator - Working Instructions
+
+## System Requirements
+- Modern web browser (Chrome, Firefox, Safari, or Edge)
+- Stable internet connection
+- PDF/Word documents for resume upload
+- Minimum screen resolution: 1280x720
+
+## Installation and Setup
+
+### For Users
+1. Access the platform through your web browser at [platform URL]
+2. Create a new account:
+   - Click on "Sign Up"
+   - Fill in required information
+   - Verify your email address
+   - Complete your profile
+
+### For Developers
+1. Clone the repository:
+   ```bash
+   git clone [repository-url]
+   ```
+
+2. Install dependencies:
+   ```bash
+   # Backend setup
+   cd backend
+   npm install
+   
+   # Frontend setup
+   cd frontend
+   npm install
+   ```
+
+3. Configure environment:
+   - Create `.env` files in both frontend and backend directories
+   - Set up required environment variables
+   - Configure database connection
+
+4. Start the application:
+   ```bash
+   # Start backend server
+   cd backend
+   npm start
+   
+   # Start frontend
+   cd frontend
+   npm start
+   ```
+
+## Using the Platform
+
+### 1. User Registration and Login
+1. Click "Sign Up" on the homepage
+2. Enter required information:
+   - Full name
+   - Email address
+   - Password
+   - Professional background
+3. Verify email through the confirmation link
+4. Login using registered email and password
+
+### 2. Profile Setup
+1. Navigate to "Profile" section
+2. Complete all required fields:
+   - Personal information
+   - Educational background
+   - Work experience
+   - Skills
+3. Upload your resume (PDF/Word format)
+4. Save changes
+
+### 3. Career Assessment
+1. Go to "Career Assessment" tab
+2. Complete the assessment questionnaire:
+   - Professional interests
+   - Skills evaluation
+   - Work preferences
+3. Submit the assessment
+4. View detailed results and recommendations
+
+### 4. AI Career Recommendations
+1. Access "Career Recommendations" section
+2. Review AI-generated career paths
+3. Explore each recommendation:
+   - Job roles
+   - Required skills
+   - Industry outlook
+   - Salary ranges
+4. Save preferred career paths
+
+### 5. Skill Gap Analysis
+1. Select target career path
+2. View current vs. required skills
+3. Access personalized learning recommendations
+4. Track progress through learning modules
+
+### 6. Resume Analysis
+1. Upload resume in PDF/Word format
+2. Wait for AI analysis completion
+3. Review feedback:
+   - Skills matching
+   - Format suggestions
+   - Content improvements
+4. Download enhanced resume
+
+### 7. Interview Preparation
+1. Navigate to "Interview Prep" section
+2. Select industry/role
+3. Access:
+   - Common questions
+   - AI-powered mock interviews
+   - Feedback on responses
+4. Practice and improve
+
+### 8. Dashboard Navigation
+1. Access main dashboard
+2. View:
+   - Progress tracking
+   - Saved careers
+   - Learning path status
+   - Recent activities
+3. Customize dashboard widgets
+
+## Troubleshooting Guide
+
+### Common Issues and Solutions
+
+1. **Login Problems**
+   - Clear browser cache
+   - Reset password if forgotten
+   - Check email verification status
+
+2. **Resume Upload Issues**
+   - Ensure file is PDF/Word format
+   - File size under 5MB
+   - Try different browser if persists
+
+3. **Assessment Not Loading**
+   - Check internet connection
+   - Refresh page
+   - Clear browser cache
+
+4. **Recommendations Not Showing**
+   - Complete profile information
+   - Finish assessment fully
+   - Contact support if persists
+
+## Support Resources
+
+### Getting Help
+1. In-app help:
+   - Click "Help" icon
+   - Browse FAQ section
+   - Use chatbot assistant
+
+2. Technical support:
+   - Email: support@aicareernavigator.com
+   - Response time: 24-48 hours
+   - Include screenshot if reporting issue
+
+### Best Practices
+1. Regular profile updates
+2. Complete all assessments fully
+3. Save important recommendations
+4. Track progress consistently
+5. Keep resume updated
+
+## Security Guidelines
+1. Use strong passwords
+2. Don't share login credentials
+3. Log out after each session
+4. Report suspicious activities
+5. Keep email verified and updated
