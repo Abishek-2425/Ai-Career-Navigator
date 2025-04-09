@@ -1,4 +1,5 @@
 const axios = require('axios');
+const logger = require('./logger');
 
 class Chatbot {
     constructor() {
@@ -320,7 +321,7 @@ Instructions:
         for (let attempt = 1; attempt <= retries; attempt++) {
             try {
                 const detailedPrompt = this.createDetailedPrompt(message);
-                console.log('Generated prompt for Mistral:', detailedPrompt);
+                logger.debug('Generated prompt for Mistral:', detailedPrompt);
 
                 const response = await axios({
                     method: 'post',
@@ -368,11 +369,11 @@ ${career.certifications.map(cert => `• ${cert}`).join('\n')}
                 return this.formatResponse(generatedText);
 
             } catch (error) {
-                console.error('Error details:', error.response?.data);
+                logger.error('Error details:', error.response?.data);
                 
                 if (error.response?.status === 503) {
                     const estimatedTime = error.response?.data?.estimated_time || 20;
-                    console.log(`Model is loading. Waiting ${Math.ceil(estimatedTime)} seconds...`);
+                    logger.info(`Model is loading. Waiting ${Math.ceil(estimatedTime)} seconds...`);
                     
                     if (attempt < retries) {
                         await this.sleep(Math.ceil(estimatedTime));

@@ -1,5 +1,6 @@
 const { HfInference } = require('@huggingface/inference');
 const dotenv = require('dotenv');
+const logger = require('./logger');
 dotenv.config();
 
 class HuggingFaceService {
@@ -30,7 +31,7 @@ class HuggingFaceService {
             });
             return response;
         } catch (error) {
-            console.error('Error generating embeddings:', error);
+            logger.error('Error generating embeddings:', error);
             throw error;
         }
     }
@@ -102,7 +103,7 @@ class HuggingFaceService {
             });
             return response[0].generated_text;
         } catch (error) {
-            console.error('Error analyzing text:', error);
+            logger.error('Error analyzing text:', error);
             return "Consider adding more quantifiable achievements and using stronger action verbs to describe your experiences.";
         }
     }

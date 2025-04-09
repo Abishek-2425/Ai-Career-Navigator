@@ -2,6 +2,7 @@ const Analytics = require('../models/Analytics');
 const User = require('../models/User');
 const CareerRecommendation = require('../models/CareerRecommendation');
 const dataProcessor = require('./dataProcessor');
+const logger = require('./logger');
 
 class AnalyticsProcessor {
     async generateCareerTrends() {
@@ -14,7 +15,7 @@ class AnalyticsProcessor {
 
             return this.aggregateTrends(trends);
         } catch (error) {
-            console.error('Error generating career trends:', error);
+            logger.error('Error generating career trends:', error);
             throw error;
         }
     }
@@ -128,7 +129,7 @@ class AnalyticsProcessor {
                     .sort((a, b) => b.count - a.count)
             };
         } catch (error) {
-            console.error('Error generating user analytics:', error);
+            logger.error('Error generating user analytics:', error);
             throw error;
         }
     }
@@ -149,7 +150,7 @@ class AnalyticsProcessor {
             await analytics.save();
             return analytics;
         } catch (error) {
-            console.error('Error updating analytics:', error);
+            logger.error('Error updating analytics:', error);
             throw error;
         }
     }
@@ -171,7 +172,7 @@ class AnalyticsProcessor {
 
             return analytics;
         } catch (error) {
-            console.error('Error getting latest analytics:', error);
+            logger.error('Error getting latest analytics:', error);
             throw error;
         }
     }

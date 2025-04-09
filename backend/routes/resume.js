@@ -8,6 +8,7 @@ const Resume = require('../models/Resume');
 const resumeProcessor = require('../utils/resumeProcessor');
 const jobMatcher = require('../utils/jobMatcher');
 const dataProcessor = require('../utils/dataProcessor');
+const { asyncHandler } = require('../utils/errorHandler');
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
@@ -199,6 +200,90 @@ router.get('/suggested-roles', auth, async (req, res) => {
         res.status(500).json({ error: 'Error fetching suggested roles' });
     }
 });
+
+// Update resume analysis
+router.post('/reanalyze', auth, async (req, res) => {
+    try {
+        const resume = await Resume.findOne({ userId: req.user.id })
+            .sort({ uploadDate: -1 });
+
+        if (!resume) {
+            return res.status(404).json({ error: 'No resume found' });
+        }
+
+        // Re-analyze the resume text
+        const text = await resumeProcessor.extractText(resume.filePath, resume.fileType);
+        const analysis = await resumeProcessor.analyzeResume(text);
+
+        // Update the analysis
+        resume.analysis = {
+            extractedSkills: analysis.extractedSkills,
+            missingKeySkills: analysis.missingKeySkills,
+            overallScore: analysis.overallScore,
+            sectionScores: analysis.sectionScores,
+            suggestions: analysis.formatFeedback,
+            aiSuggestions: analysis.aiSuggestions
+        };
+        resume.suggestedRoles = analysis.suggestedRoles;
+
+        await resume.save();
+
+        res.json({
+            message: 'Resume reanalyzed successfully',
+            analysis: resume.analysis,
+            suggestedRoles: resume.suggestedRoles
+        });
+
+    } catch (error) {
+        console.error('Error reanalyzing resume:', error);
+        res.status(500).json({ error: 'Error reanalyzing resume' });
+    }
+});
+
+// Delete resume
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        const resume = await Resume.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        });
+
+        if (!resume) {
+            return res.status(404).json({ error: 'Resume not found' });
+        }
+
+        // Delete file from storage
+        await fs.unlink(resume.filePath);
+
+        // Delete from database
+        await resume.remove();
+
+        res.json({ message: 'Resume deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Use the data transformers for API responses
+const { transformResumeData } = require('../utils/transformers');
+
+// Get resume analysis
+router.get('/history', auth, async (req, res) => {
+  try {
+    const resumes = await Resume.find({ userId: req.user.id });
+    res.json({ success: true, data: resumes });
+  } catch (error) {
+    console.error('Error fetching resume history:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// After:
+router.get('/history', auth, asyncHandler(async (req, res) => {
+    const resumes = await Resume.find({ userId: req.user.id });
+    const transformedResumes = resumes.map(transformResumeData);
+    res.json({ success: true, data: transformedResumes });
+}));
 
 // Update resume analysis
 router.post('/reanalyze', auth, async (req, res) => {

@@ -5,6 +5,7 @@ const path = require('path');
 const huggingfaceService = require('./huggingfaceService');
 const personalInfoExtractor = require('./personalInfoExtractor');
 const jobMatcher = require('./jobMatcher');
+const logger = require('./logger');
 
 class ResumeProcessor {
     constructor() {
@@ -273,59 +274,60 @@ class ResumeProcessor {
         return Math.min(score, 100);
     }
 
+    // Before:
     async analyzeResume(text) {
-        try {
-            console.log('Starting resume analysis...');
-            
-            // Extract personal info
-            const personalInfo = await personalInfoExtractor.extract(text);
-            console.log('Extracted personal info:', personalInfo);
-
-            // Extract skills
-            const extractedSkills = await this.extractSkills(text);
-            console.log('Extracted skills:', extractedSkills);
-
-            // Get required skills from job roles
-            const requiredSkills = ['JavaScript', 'Python', 'Java', 'React', 'Node.js', 'SQL'];
-            console.log('Got required skills');
-
-            // Find missing key skills
-            const missingKeySkills = this.findMissingKeySkills(extractedSkills, requiredSkills);
-
-            // Analyze action verbs
-            const actionVerbs = await this.analyzeActionVerbs(text);
-            console.log('Analyzed action verbs:', actionVerbs);
-
-            // Calculate section scores
-            const sectionScores = {
-                formatting: this.calculateFormattingScore(text),
-                content: this.calculateContentScore(text, actionVerbs),
-                skills: this.calculateSkillsScore(extractedSkills, requiredSkills),
-                achievements: this.calculateAchievementsScore(text, actionVerbs)
-            };
-
-            // Calculate overall score
-            const overallScore = this.calculateOverallScore(sectionScores);
-
-            // Generate suggestions
-            const suggestions = await this.generateSuggestions(text, extractedSkills, missingKeySkills, actionVerbs, sectionScores);
-
-            // Get AI suggestions
-            const aiSuggestions = await this.getAISuggestions(text, extractedSkills, actionVerbs);
-
-            return {
-                personalInfo,
-                extractedSkills,
-                missingKeySkills,
-                sectionScores,
-                overallScore,
-                suggestions,
-                aiSuggestions
-            };
-        } catch (error) {
-            console.error('Error in resume analysis:', error);
-            throw error;
-        }
+      try {
+        logger.info('Starting resume analysis...');
+        
+        // Extract personal info
+        const personalInfo = await personalInfoExtractor.extract(text);
+        logger.debug('Extracted personal info:', personalInfo);
+        
+        // Extract skills
+        const extractedSkills = await this.extractSkills(text);
+        logger.debug('Extracted skills:', extractedSkills);
+    
+        // Get required skills from job roles
+        const requiredSkills = ['JavaScript', 'Python', 'Java', 'React', 'Node.js', 'SQL'];
+        console.log('Got required skills');
+    
+        // Find missing key skills
+        const missingKeySkills = this.findMissingKeySkills(extractedSkills, requiredSkills);
+    
+        // Analyze action verbs
+        const actionVerbs = await this.analyzeActionVerbs(text);
+        console.log('Analyzed action verbs:', actionVerbs);
+    
+        // Calculate section scores
+        const sectionScores = {
+            formatting: this.calculateFormattingScore(text),
+            content: this.calculateContentScore(text, actionVerbs),
+            skills: this.calculateSkillsScore(extractedSkills, requiredSkills),
+            achievements: this.calculateAchievementsScore(text, actionVerbs)
+        };
+    
+        // Calculate overall score
+        const overallScore = this.calculateOverallScore(sectionScores);
+    
+        // Generate suggestions
+        const suggestions = await this.generateSuggestions(text, extractedSkills, missingKeySkills, actionVerbs, sectionScores);
+    
+        // Get AI suggestions
+        const aiSuggestions = await this.getAISuggestions(text, extractedSkills, actionVerbs);
+    
+        return {
+            personalInfo,
+            extractedSkills,
+            missingKeySkills,
+            sectionScores,
+            overallScore,
+            suggestions,
+            aiSuggestions
+        };
+    } catch (error) {
+        logger.error('Error in resume analysis:', error);
+        throw error;
+    }
     }
 
     calculateSkillsScore(extractedSkills, requiredSkills) {

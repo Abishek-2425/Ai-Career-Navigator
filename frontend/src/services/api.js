@@ -1,76 +1,90 @@
 import axios from 'axios';
 
+// Create axios instance with default config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:10001/api',
-  headers: {
-    'Content-Type': 'application/json'
-  }
+    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+    headers: {
+        'Content-Type': 'application/json'
+    }
 });
 
-// Add token to requests
+// Request interceptor for adding auth token
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    // Don't override Content-Type if it's already set (for multipart/form-data)
-    if (!config.headers['Content-Type']) {
-      config.headers['Content-Type'] = 'application/json';
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
 );
 
-// Handle token expiration
+// Response interceptor for handling errors
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error('API Error:', error.response?.data || error.message);
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    (response) => response,
+    (error) => {
+        // Handle 401 Unauthorized errors
+        if (error.response && error.response.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
     }
-    return Promise.reject(error);
-  }
 );
 
-export const authAPI = {
-  login: (credentials) => api.post('/auth/login', credentials),
-  register: (userData) => api.post('/auth/register', userData),
-  getCurrentUser: () => api.get('/auth/me'),
-  updateProfile: (data) => api.put('/auth/profile', data)
+// Auth services
+const authService = {
+    login: (credentials) => api.post('/auth/login', credentials),
+    register: (userData) => api.post('/auth/register', userData),
+    forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+    resetPassword: (token, password) => api.post('/auth/reset-password', { token, password }),
+    verifyEmail: (token) => api.get(`/auth/verify-email/${token}`),
+    getProfile: () => api.get('/auth/profile')
 };
 
-export const careerAPI = {
-  getRecommendations: () => api.get('/recommendations'),
-  generateRecommendations: () => api.post('/recommendations/generate'),
-  getTrends: () => api.get('/recommendations/trends')
+// Resume services
+const resumeService = {
+    uploadResume: (formData) => {
+        return api.post('/resume/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    },
+    getResumeHistory: () => api.get('/resume/history'),
+    getResumeAnalysis: (resumeId) => api.get(`/resume/analysis/${resumeId}`),
+    deleteResume: (resumeId) => api.delete(`/resume/${resumeId}`)
 };
 
-export const chatAPI = {
-  startChat: () => api.post('/chat/start'),
-  sendMessage: (chatId, message) => api.post(`/chat/${chatId}/message`, { message }),
-  getChatHistory: () => api.get('/chat/history'),
-  getCareerAdvice: () => api.get('/chat/advice')
+// Career recommendation services
+const careerService = {
+    getRecommendations: () => api.get('/recommendations'),
+    getSuggestedRoles: () => api.get('/recommendations/roles'),
+    getSkillGapAnalysis: (roleId) => api.get(`/recommendations/skill-gap/${roleId}`),
+    savePreferredPath: (pathData) => api.post('/recommendations/save-path', pathData)
 };
 
-export const resumeAPI = {
-  uploadResume: (formData) => api.post('/resume/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  getAnalysis: () => api.get('/resume/analysis'),
-  deleteResume: (id) => api.delete(`/resume/${id}`)
+// Analytics services
+const analyticsService = {
+    getUserAnalytics: () => api.get('/analytics/user'),
+    getCareerTrends: () => api.get('/analytics/trends'),
+    getSkillDemand: () => api.get('/analytics/skill-demand')
 };
 
-export const analyticsAPI = {
-  getPublicTrends: () => api.get('/analytics/trends/public'),
-  getDetailedTrends: () => api.get('/analytics/trends/detailed'),
-  getSkillTrends: () => api.get('/analytics/skills'),
-  getIndustryTrends: () => api.get('/analytics/industries')
+// Learning services
+const learningService = {
+    getLearningResources: (filters) => api.get('/learning/resources', { params: filters }),
+    bookmarkResource: (resourceId) => api.post(`/learning/bookmark/${resourceId}`),
+    getBookmarkedResources: () => api.get('/learning/bookmarks'),
+    trackProgress: (progressData) => api.post('/learning/track-progress', progressData)
 };
 
-export default api;
+export {
+    api as default,
+    authService,
+    resumeService,
+    careerService,
+    analyticsService,
+    learningService
+};

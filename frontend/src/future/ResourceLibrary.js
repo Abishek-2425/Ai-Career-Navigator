@@ -1,25 +1,48 @@
+/**
+ * @file ResourceLibrary.js
+ * @description Learning resources library component
+ * 
+ * This component was moved to the future/ directory as it's not currently used
+ * in the application but will be essential for the Learning and Skill Gap Analysis features.
+ * 
+ * Future use: Display, search, and filter learning resources to help users
+ * bridge skill gaps identified in their career path analysis.
+ */
+
 import React, { useState } from 'react';
 import {
     Box,
     Typography,
+    Grid,
+    Card,
+    CardContent,
+    IconButton,
     TextField,
     InputAdornment,
     Chip,
     List,
+    ListItem,
+    ListItemText,
+    ListItemIcon,
+    ListItemSecondaryAction,
     Divider,
     Menu,
     MenuItem,
-    ListItemIcon,
-    ListItemText
+    Button
 } from '@mui/material';
 import {
     Search,
     FilterList,
+    BookmarkBorder,
+    Bookmark,
+    Description,
+    VideoLibrary,
+    Link as LinkIcon,
+    MoreVert,
     Download,
     Share,
     OpenInNew
 } from '@mui/icons-material';
-import ResourceCard from '../../../components/common/ResourceCard';
 
 const ResourceLibrary = ({ data }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -39,8 +62,17 @@ const ResourceLibrary = ({ data }) => {
         setSelectedResource(null);
     };
 
-    const handleBookmark = (resource) => {
-        // Handle bookmark logic
+    const getResourceIcon = (type) => {
+        switch (type) {
+            case 'document':
+                return <Description />;
+            case 'video':
+                return <VideoLibrary />;
+            case 'link':
+                return <LinkIcon />;
+            default:
+                return <Description />;
+        }
     };
 
     const filteredResources = data.filter(resource => {
@@ -88,11 +120,52 @@ const ResourceLibrary = ({ data }) => {
             <List>
                 {filteredResources.map((resource, index) => (
                     <React.Fragment key={index}>
-                        <ResourceCard 
-                            resource={resource}
-                            onBookmark={handleBookmark}
-                            onMenuOpen={handleMenuOpen}
-                        />
+                        <ListItem
+                            sx={{
+                                bgcolor: 'background.paper',
+                                '&:hover': { bgcolor: 'action.hover' }
+                            }}
+                        >
+                            <ListItemIcon>
+                                {getResourceIcon(resource.type)}
+                            </ListItemIcon>
+                            <ListItemText
+                                primary={
+                                    <Typography variant="subtitle1">
+                                        {resource.title}
+                                    </Typography>
+                                }
+                                secondary={
+                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 0.5 }}>
+                                        <Chip
+                                            label={resource.type}
+                                            size="small"
+                                            variant="outlined"
+                                        />
+                                        <Typography variant="caption" color="text.secondary">
+                                            {resource.duration || resource.size}
+                                        </Typography>
+                                    </Box>
+                                }
+                            />
+                            <ListItemSecondaryAction>
+                                <IconButton
+                                    onClick={() => {/* Handle bookmark */}}
+                                    sx={{ mr: 1 }}
+                                >
+                                    {resource.bookmarked ? (
+                                        <Bookmark color="primary" />
+                                    ) : (
+                                        <BookmarkBorder />
+                                    )}
+                                </IconButton>
+                                <IconButton
+                                    onClick={(e) => handleMenuOpen(e, resource)}
+                                >
+                                    <MoreVert />
+                                </IconButton>
+                            </ListItemSecondaryAction>
+                        </ListItem>
                         {index < filteredResources.length - 1 && <Divider />}
                     </React.Fragment>
                 ))}
@@ -130,6 +203,15 @@ const ResourceLibrary = ({ data }) => {
                     <Typography variant="body1" color="text.secondary" gutterBottom>
                         No resources found
                     </Typography>
+                    <Button
+                        variant="outlined"
+                        onClick={() => {
+                            setSearchTerm('');
+                            setSelectedType('all');
+                        }}
+                    >
+                        Clear Filters
+                    </Button>
                 </Box>
             )}
         </Box>

@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
+const config = require('./config');
+const logger = require('./utils/logger');
 
 // Initialize express app
 const app = express();
@@ -34,23 +36,30 @@ app.get('/api', (req, res) => {
 });
 
 // Test MongoDB connection
-const testMongoDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/career-navigator', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        console.log('✓ MongoDB connected successfully');
-        
-        // Test the connection by listing collections
-        const collections = await mongoose.connection.db.listCollections().toArray();
-        console.log('Available collections:', collections.map(c => c.name));
-        
-    } catch (err) {
-        console.error('✗ MongoDB connection error:', err);
-        process.exit(1);
+async function testMongoDB() {
+  try {
+    // Make sure we have a valid connection
+    if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+      console.log('✗ MongoDB connection not ready');
+      return false;
     }
-};
+    
+    // Get the database instance
+    const db = mongoose.connection.db;
+    if (!db) {
+      console.log('✗ MongoDB database instance not available');
+      return false;
+    }
+    
+    // Test listing collections
+    await db.listCollections().toArray();
+    console.log('✓ MongoDB connected successfully');
+    return true;
+  } catch (error) {
+    console.log(`✗ MongoDB connection error: ${error.message}`);
+    return false;
+  }
+}
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -75,22 +84,48 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Not Found' });
 });
 
-const PORT = process.env.PORT || 5000;
-
-// Start server and test MongoDB
-const startServer = async () => {
-    await testMongoDB();
-    
-    const server = app.listen(PORT, () => {
-        console.log('\nServer Status:');
-        console.log('✓ Server is running on port', PORT);
-        console.log(`✓ Test the server at: http://localhost:${PORT}`);
-        console.log(`✓ API endpoint at: http://localhost:${PORT}/api`);
-        console.log(`✓ Auth endpoints at: http://localhost:${PORT}/api/auth/*\n`);
+// Start server function with error handling
+async function startServer() {
+  try {
+    const server = app.listen(config.server.port, () => {
+      console.log(`Server running on port ${config.server.port}`);
     });
-};
+    
+    // Add error handler for the server
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${config.server.port} is already in use. Please use a different port.`);
+        process.exit(1);
+      } else {
+        console.error(`Server error: ${error.message}`);
+      }
+    });
+    
+    return server;
+  } catch (error) {
+    console.error(`Failed to start server: ${error.message}`);
+    throw error;
+  }
+}
 
-startServer().catch(err => {
-    console.error('Failed to start server:', err);
+// Single MongoDB connection with proper sequence
+mongoose.connect(config.database.uri)
+  .then(async () => {
+    console.log('MongoDB connected');
+    // Wait a moment for the connection to be fully established
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Test MongoDB connection
+    const isDbReady = await testMongoDB();
+    
+    if (isDbReady) {
+      // Only start the server if MongoDB is ready
+      await startServer();
+    } else {
+      console.error('Failed to connect to MongoDB properly. Server not started.');
+      process.exit(1);
+    }
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
     process.exit(1);
-});
+  });

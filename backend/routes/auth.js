@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const { asyncHandler, AppError } = require('../utils/errorHandler');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
 
@@ -54,7 +55,15 @@ router.post('/register', async (req, res) => {
 });
 
 // Login user
-router.post('/login', async (req, res) => {
+router.post('/login', asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new AppError('Invalid credentials', 401);
+    }
+
+    // Rest of login logic
     try {
         console.log('Login attempt with body:', req.body);
         const { email, password } = req.body;
@@ -104,7 +113,7 @@ router.post('/login', async (req, res) => {
         console.error('Login error:', error);
         res.status(500).json({ error: error.message || 'Login failed' });
     }
-});
+}));
 
 // Get current user
 router.get('/me', auth, async (req, res) => {

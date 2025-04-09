@@ -4,6 +4,10 @@ const { auth } = require('../middleware/auth');
 const CareerRecommendation = require('../models/CareerRecommendation');
 const dataProcessor = require('../utils/dataProcessor');
 
+// Use the middleware factory for validation and role checking
+const { validateRequest, checkRole } = require('../middleware/middlewareFactory');
+const { recommendationSchema } = require('../validation/schemas');
+
 // Initialize data processor
 (async () => {
     try {
