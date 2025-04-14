@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import {
     Box,
@@ -16,8 +16,8 @@ const LearningPath = () => {
     const { recommendations } = useSelector((state) => state.career);
     const [activeStep, setActiveStep] = React.useState(0);
 
-    // Example learning path data
-    const learningPath = [
+    // Example learning path data - memoized to prevent recreation on each render
+    const learningPath = useMemo(() => [
         {
             label: 'Foundation Skills',
             description: 'Master the fundamental skills required for your career path',
@@ -48,15 +48,16 @@ const LearningPath = () => {
             ],
             completed: false
         }
-    ];
+    ], []);
 
-    const handleNext = () => {
+    // Memoize these handlers to prevent recreation on each render
+    const handleNext = useMemo(() => () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    };
+    }, []);
 
-    const handleBack = () => {
+    const handleBack = useMemo(() => () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    };
+    }, []);
 
     return (
         <Box>
@@ -101,15 +102,14 @@ const LearningPath = () => {
                                         key={idx}
                                         variant="body2" 
                                         color="text.secondary"
-                                        sx={{ mb: 0.5 }}
+                                        sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}
                                     >
                                         • {resource.name} ({resource.platform})
                                     </Typography>
                                 ))}
-
-                                <Box sx={{ mb: 2 }} />
-
-                                <Box sx={{ display: 'flex', gap: 1 }}>
+                            </Box>
+                            <Box sx={{ mb: 2 }}>
+                                <div>
                                     <Button
                                         variant="contained"
                                         onClick={handleNext}
@@ -124,18 +124,17 @@ const LearningPath = () => {
                                     >
                                         Back
                                     </Button>
-                                </Box>
+                                </div>
                             </Box>
                         </StepContent>
                     </Step>
                 ))}
             </Stepper>
-            
             {activeStep === learningPath.length && (
                 <Paper square elevation={0} sx={{ p: 3 }}>
-                    <Typography>All steps completed - you&apos;re finished</Typography>
+                    <Typography>All steps completed - you're finished</Typography>
                     <Button onClick={() => setActiveStep(0)} sx={{ mt: 1, mr: 1 }}>
-                        Reset Path
+                        Reset
                     </Button>
                 </Paper>
             )}
@@ -143,4 +142,5 @@ const LearningPath = () => {
     );
 };
 
-export default LearningPath;
+// Export as memoized component to prevent unnecessary re-renders
+export default React.memo(LearningPath);

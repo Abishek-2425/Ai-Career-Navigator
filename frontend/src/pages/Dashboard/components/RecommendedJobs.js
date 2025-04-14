@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import {
     Box,
@@ -16,8 +16,8 @@ import { Work, LocationOn, AttachMoney } from '@mui/icons-material';
 const RecommendedJobs = () => {
     const { recommendations } = useSelector((state) => state.career);
 
-    // Example jobs data
-    const jobs = [
+    // Example jobs data - memoized to prevent recreation on each render
+    const jobs = useMemo(() => [
         {
             title: 'Senior Software Engineer',
             company: 'Tech Corp',
@@ -45,7 +45,7 @@ const RecommendedJobs = () => {
             skills: ['Product Strategy', 'Agile', 'Analytics'],
             source: 'stackoverflow-2023'
         }
-    ];
+    ], []);
 
     return (
         <Box>
@@ -101,36 +101,33 @@ const RecommendedJobs = () => {
                                             ))}
                                         </Box>
                                     </Grid>
-
-                                    <Grid item xs={12} md={4} sx={{ 
-                                        display: 'flex', 
-                                        flexDirection: 'column',
-                                        alignItems: { xs: 'flex-start', md: 'flex-end' },
-                                        justifyContent: 'space-between'
-                                    }}>
-                                        <Box sx={{ 
-                                            display: 'flex', 
-                                            alignItems: 'center',
-                                            mb: 2
-                                        }}>
-                                            <Typography variant="body2" sx={{ mr: 1 }}>
-                                                Match Score:
+                                    <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                                        <Box sx={{ textAlign: 'right' }}>
+                                            <Typography variant="subtitle2" gutterBottom>
+                                                Match Score
                                             </Typography>
-                                            <Rating
-                                                value={job.matchScore / 20}
-                                                readOnly
-                                                precision={0.5}
-                                            />
-                                        </Box>
-
-                                        <Box>
-                                            <Button variant="contained" sx={{ mb: 1 }}>
-                                                Apply Now
-                                            </Button>
-                                            <Typography variant="caption" display="block" color="text.secondary">
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                <Typography 
+                                                    variant="h5" 
+                                                    color="primary" 
+                                                    sx={{ fontWeight: 'bold' }}
+                                                >
+                                                    {job.matchScore}%
+                                                </Typography>
+                                                <Rating 
+                                                    value={job.matchScore / 20} 
+                                                    precision={0.5} 
+                                                    readOnly 
+                                                    sx={{ ml: 1 }}
+                                                />
+                                            </Box>
+                                            <Typography variant="caption" color="text.secondary">
                                                 Source: {job.source}
                                             </Typography>
                                         </Box>
+                                        <Button variant="contained" size="small" sx={{ mt: 2 }}>
+                                            View Details
+                                        </Button>
                                     </Grid>
                                 </Grid>
                             </CardContent>
@@ -142,4 +139,5 @@ const RecommendedJobs = () => {
     );
 };
 
-export default RecommendedJobs;
+// Export as memoized component to prevent unnecessary re-renders
+export default React.memo(RecommendedJobs);

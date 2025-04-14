@@ -1,33 +1,34 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import {
     Box,
     Typography,
-    LinearProgress,
     List,
     ListItem,
     ListItemText,
     Tooltip
 } from '@mui/material';
+import { ProgressBar } from '../../../components/common';
 
 const SkillsProgress = () => {
     const { recommendations } = useSelector((state) => state.career);
 
-    // Example skills data
-    const skills = [
+    // Example skills data - memoized to prevent recreation on each render
+    const skills = useMemo(() => [
         { name: 'React', progress: 85 },
         { name: 'Node.js', progress: 70 },
         { name: 'Python', progress: 60 },
         { name: 'Data Analysis', progress: 75 },
         { name: 'Machine Learning', progress: 45 }
-    ];
+    ], []);
 
-    const getProgressColor = (progress) => {
+    // Memoize this function to prevent recreation on each render
+    const getProgressColor = useMemo(() => (progress) => {
         if (progress >= 80) return 'success';
         if (progress >= 60) return 'primary';
         if (progress >= 40) return 'warning';
         return 'error';
-    };
+    }, []);
 
     return (
         <Box>
@@ -47,18 +48,15 @@ const SkillsProgress = () => {
                             </Typography>
                         </Box>
                         <Tooltip title={`${skill.progress}% proficiency`}>
-                            <LinearProgress
-                                variant="determinate"
-                                value={skill.progress}
-                                color={getProgressColor(skill.progress)}
-                                sx={{
-                                    height: 6,
-                                    borderRadius: 3,
-                                    '& .MuiLinearProgress-bar': {
-                                        borderRadius: 3
-                                    }
-                                }}
-                            />
+                            <Box sx={{ width: '100%' }}>
+                                <ProgressBar
+                                    value={skill.progress}
+                                    color={getProgressColor(skill.progress)}
+                                    height={6}
+                                    showPercentage={false}
+                                    ariaLabel={`${skill.name} proficiency`}
+                                />
+                            </Box>
                         </Tooltip>
                     </ListItem>
                 ))}
@@ -89,4 +87,5 @@ const SkillsProgress = () => {
     );
 };
 
-export default SkillsProgress;
+// Export as memoized component to prevent unnecessary re-renders
+export default React.memo(SkillsProgress);

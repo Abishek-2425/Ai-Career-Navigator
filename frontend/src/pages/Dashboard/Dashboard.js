@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
     Grid,
@@ -41,9 +41,25 @@ import {
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 
-const SkillNode = ({ skill, level = 0 }) => {
+// Memoized SkillNode component to prevent unnecessary re-renders in the skill tree
+const SkillNode = React.memo(({ skill, level = 0 }) => {
     const theme = useTheme();
     const isUnlocked = skill.unlocked;
+    
+    // Memoize the tooltip content to prevent recreation on each render
+    const tooltipContent = useMemo(() => (
+        <Box>
+            <Typography variant="subtitle2">{skill.name}</Typography>
+            <Typography variant="caption" display="block">
+                Level: {skill.level}/{skill.maxLevel}
+            </Typography>
+            {skill.description && (
+                <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+                    {skill.description}
+                </Typography>
+            )}
+        </Box>
+    ), [skill.name, skill.level, skill.maxLevel, skill.description]);
     
     return (
         <Box sx={{ 
@@ -58,19 +74,7 @@ const SkillNode = ({ skill, level = 0 }) => {
                 bgcolor: isUnlocked ? theme.palette.primary.main : alpha(theme.palette.text.disabled, 0.3),
             } : {}
         }}>
-            <Tooltip title={
-                <Box>
-                    <Typography variant="subtitle2">{skill.name}</Typography>
-                    <Typography variant="caption" display="block">
-                        Level: {skill.level}/{skill.maxLevel}
-                    </Typography>
-                    {skill.description && (
-                        <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
-                        {skill.description}
-                    </Typography>
-                    )}
-                </Box>
-            }>
+            <Tooltip title={tooltipContent}>
                 <Paper
                     elevation={isUnlocked ? 2 : 0}
                     sx={{
@@ -161,20 +165,22 @@ const SkillNode = ({ skill, level = 0 }) => {
             )}
         </Box>
     );
-};
+});
 
-const CareerCompanion = ({ userName }) => {
+// Memoized CareerCompanion component to prevent unnecessary re-renders
+const CareerCompanion = React.memo(({ userName }) => {
     const theme = useTheme();
     const [mood, setMood] = useState('happy');
     const [message, setMessage] = useState('Ready to achieve great things today!');
     const [energy, setEnergy] = useState(80);
 
-    const moodEmojis = {
+    // Memoize the emoji objects to prevent recreation on each render
+    const moodEmojis = useMemo(() => ({
         happy: <EmojiEmotions sx={{ fontSize: 64, color: '#FFD700' }} />,
         thinking: <Psychology sx={{ fontSize: 64, color: theme.palette.primary.main }} />,
         inspired: <Lightbulb sx={{ fontSize: 64, color: '#FFA500' }} />,
         needsCoffee: <Coffee sx={{ fontSize: 64, color: '#8B4513' }} />
-    };
+    }), [theme.palette.primary.main]);
 
     const getPersonalizedMessage = useCallback((mood) => {
         const messages = {
@@ -213,6 +219,7 @@ const CareerCompanion = ({ userName }) => {
         return () => clearInterval(interval);
     }, [getPersonalizedMessage]);
 
+    // Fixed HTML nesting issues by ensuring proper component hierarchy
     return (
         <Paper sx={{ 
             p: 3,
@@ -278,7 +285,8 @@ const CareerCompanion = ({ userName }) => {
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, textAlign: 'center' }}>
                     Daily Tip
                 </Typography>
-                <Paper sx={{ 
+                {/* Using Box instead of Paper to avoid nesting issues */}
+                <Box sx={{ 
                     p: 2,
                     bgcolor: alpha(theme.palette.primary.main, 0.05),
                     border: `1px dashed ${alpha(theme.palette.primary.main, 0.2)}`
@@ -286,34 +294,18 @@ const CareerCompanion = ({ userName }) => {
                     <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
                         "Take small steps every day. They add up to big achievements!"
                     </Typography>
-                </Paper>
+                </Box>
             </Box>
         </Paper>
     );
-};
+});
 
 const Dashboard = () => {
     const user = useSelector(state => state.auth.user);
     const theme = useTheme();
     
-    console.log('User data:', user);
-
-    if (!user) {
-        return (
-            <Container 
-                sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    minHeight: '60vh'
-                }}
-            >
-                <CircularProgress />
-            </Container>
-        );
-    }
-
-    const featuredActions = [
+    // Memoize these data arrays to prevent recreation on each render
+    const featuredActions = useMemo(() => [
         {
             title: 'Career Trends',
             icon: <TrendingUp />,
@@ -358,9 +350,9 @@ const Dashboard = () => {
                 nextMilestone: '5 courses'
             }
         }
-    ];
+    ], []);
 
-    const recentActivities = [
+    const recentActivities = useMemo(() => [
         {
             type: 'course',
             title: 'Completed Python Basics',
@@ -389,9 +381,9 @@ const Dashboard = () => {
             icon: <Business color="info" />,
             color: 'info'
         }
-    ];
+    ], []);
 
-    const recommendedSkills = [
+    const recommendedSkills = useMemo(() => [
         {
             name: 'React.js',
             category: 'Technical',
@@ -416,9 +408,9 @@ const Dashboard = () => {
             relevance: 80,
             progress: 70
         }
-    ];
+    ], []);
 
-    const jobMatches = [
+    const jobMatches = useMemo(() => [
         {
             title: 'Senior Full Stack Developer',
             company: 'Tech Corp',
@@ -446,8 +438,24 @@ const Dashboard = () => {
             postedDate: '5 days ago',
             skills: ['React.js', 'Angular', 'Vue.js']
         }
-    ];
+    ], []);
 
+    // Add loading state check
+    if (!user) {
+        return (
+            <Container 
+                sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    minHeight: '60vh'
+                }}
+            >
+                <CircularProgress />
+            </Container>
+        );
+    }
+    
     return (
         <Container 
             sx={{ 
