@@ -1,9 +1,10 @@
 import React from 'react';
-import { Box, useTheme } from '@mui/material';
+import { Box, useTheme, useMediaQuery } from '@mui/material';
 import Navbar from './Navbar';
 
 const Layout = ({ children }) => {
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     return (
         <Box sx={{ 
@@ -17,9 +18,12 @@ const Layout = ({ children }) => {
                 component="main"
                 sx={{
                     flexGrow: 1,
-                    p: 3,
-                    mt: '64px' // Add margin top to account for fixed navbar
+                    p: { xs: 2, sm: 3 },
+                    mt: '64px', // Add margin top to account for fixed navbar
+                    overflowX: 'hidden' // Prevent horizontal scrolling on mobile
                 }}
+                role="main"
+                aria-label="Main content"
             >
                 {children}
             </Box>
