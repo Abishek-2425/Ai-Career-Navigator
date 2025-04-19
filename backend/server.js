@@ -67,9 +67,9 @@ app.use('/api/chat', require('./routes/chat'));
 app.use('/api/resume', require('./routes/resume'));  
 
 // TODO: These routes will be implemented later
-// app.use('/api/recommendations', require('./routes/recommendations'));
-// app.use('/api/progress', require('./routes/progress'));
-// app.use('/api/trends', require('./routes/trends'));
+app.use('/api/recommendations', require('./routes/recommendations'));
+// app.use('/api/progress', require('./routes/progress')); // Not implemented yet
+// app.use('/api/trends', require('./routes/trends')); // Not implemented yet
 
 // Error handling middleware
 app.use((err, req, res, next) => {
