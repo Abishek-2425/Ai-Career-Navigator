@@ -74,7 +74,7 @@ const Navbar = () => {
                         color: theme.palette.text.primary
                     }}
                 >
-                    AI Career Navigator
+                    N E X P L O R E
                 </Typography>
 
                 {isAuthenticated ? (
